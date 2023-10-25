@@ -1,0 +1,10 @@
+{
+	"type": "garrison",
+	"affects": ["Ram"],
+	"modifications": [
+		{ "value": "UnitMotion/WalkSpeed", "add": 0.72 }
+	],
+	"auraName": "Pushing Rams",
+	"auraDescription": "Rams needs to be pushed to move.",
+	"stackable": true
+}
