@@ -1,0 +1,12 @@
+{
+	"code": "arrows",
+	"name": "Arrows",
+	"description": "used as projectiles for archers.",
+	"order": 4,
+	"subtypes": {
+		"arrows": "Arrows"
+	},
+	"properties": ["barterable", "tradable", "tributable"],
+	"truePrice": 100,
+	"aiAnalysisInfluenceGroup": "sparse"
+}

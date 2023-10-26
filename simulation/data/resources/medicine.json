@@ -1,0 +1,13 @@
+{
+	"code": "medicines",
+	"name": "Medicines",
+	"description": "used to heal poisons and plagues.",
+	"order": 4,
+	"subtypes": {
+		"antidot": "Anti-dot",
+		"cure": "Cure"
+	},
+	"properties": ["barterable", "tradable", "tributable"],
+	"truePrice": 100,
+	"aiAnalysisInfluenceGroup": "sparse"
+}
