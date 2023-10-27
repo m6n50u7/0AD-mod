@@ -504,14 +504,19 @@ UnitAI.prototype.UnitFsmSpec = {
 			let riderAI = Engine.QueryInterface(msg.data.entity, IID_UnitAI);
 			let cmpTurretable = Engine.QueryInterface(msg.data.entity, IID_Turretable);
 			cmpTurretable.LeaveTurret();
-			let order = msg.data;
-			order.entity = 0;
-			order.redrop = false;
+			let order = {
+			"target": msg.data.target,
+			"type": msg.data.type,
+			"template": msg.data.template,
+			"force": msg.data.force,
+			"redrop": false,
+			"full": msg.data.full
+			};
 			riderAI.AddOrder("Gather", order, true, false);
 			riderAI.AddOrder("Garrison", { "target": this.entity, "force": true, "garrison": false }, true, false);
 			if(msg.data.redrop)
 				riderAI.AddOrder("DropAtNearestDropSite", { "force": true }, true, false);
-			return true;//this.FinishOrder;
+			return true;
 		}
 		let cmpTurretable = Engine.QueryInterface(this.entity, IID_Turretable);
 		let tur = 0;
@@ -525,12 +530,18 @@ UnitAI.prototype.UnitFsmSpec = {
 			let cmpTurAI = Engine.QueryInterface(tur, IID_UnitAI);
 			if(cmpTurAI)
 			{
-				let order = msg.data;
-				order.entity = this.entity;
+				let order = {
+				"target": msg.data.target,
+				"type": msg.data.type,
+				"template": msg.data.template,
+				"force": msg.data.force,
+				"redrop": msg.data.redrop,
+				"full": msg.data.full,
+				"entity": this.entity
+				};
 				cmpTurAI.AddOrder("WalkToTarget", { "target": msg.data.target, "force": true }, true, false);
 				cmpTurAI.AddOrder("Gather", order, true, false);
 			}
-			//this.FinishOrder();
 			return true;
 		}
 		// We were given the order to gather while we were still gathering.
@@ -611,18 +622,29 @@ UnitAI.prototype.UnitFsmSpec = {
 		return ACCEPT_ORDER;
 	},
 
-	"Order.DropAtNearestDropSite": function(msg) {log(614)
+	"Order.DropAtNearestDropSite": function(msg) {
 		const cmpResourceGatherer = Engine.QueryInterface(this.entity, IID_ResourceGatherer);
 		if (!cmpResourceGatherer)
 			return this.FinishOrder();
 		const nearby = this.FindNearestDropsite(cmpResourceGatherer.GetMainCarryingType());
-		if (!nearby)
-			return this.FinishOrder();
+		if (!nearby){
+			return this.FinishOrder();}
+
 		this.ReturnResource(nearby, false, true);
 		return ACCEPT_ORDER;
 	},
 
 	"Order.ReturnResource": function(msg) {
+		if (msg.data.entity)
+		{
+			let riderAI = Engine.QueryInterface(msg.data.entity, IID_UnitAI);
+			let order = {
+			"target": msg.data.target,
+			"force": true
+			};
+			riderAI.AddOrder("ReturnResource", order, true, true);
+			return true;
+		}
 		if (this.CheckTargetRange(msg.data.target, IID_ResourceGatherer))
 			this.SetNextState("INDIVIDUAL.RETURNRESOURCE.DROPPINGRESOURCES");
 		else if (this.AbleToMove())
@@ -2606,8 +2628,8 @@ UnitAI.prototype.UnitFsmSpec = {
 				},
 
 				"InventoryFilled": function(msg) {
-					if(this.order.data.redrop)
-						this.SetNextState("RETURNINGRESOURCE");
+					if(this.order.data.redrop){
+						this.SetNextState("RETURNINGRESOURCE");}
 					else {
 						this.FinishOrder();
 						return true;
@@ -2749,7 +2771,7 @@ UnitAI.prototype.UnitFsmSpec = {
 				"APPROACHING": "INDIVIDUAL.RETURNRESOURCE.APPROACHING",
 
 				"DROPPINGRESOURCES": {
-					"enter": function() {error(2752)
+					"enter": function() {
 						let cmpResourceGatherer = Engine.QueryInterface(this.entity, IID_ResourceGatherer);
 						if (this.CanReturnResource(this.order.data.target, true, cmpResourceGatherer) &&
 							cmpResourceGatherer.IsTargetInRange(this.order.data.target))
@@ -2882,7 +2904,30 @@ UnitAI.prototype.UnitFsmSpec = {
 						this.SetNextState("DROPPINGRESOURCES");
 						return true;
 					}
-					error(2885)
+					
+					let cmpTurretable = Engine.QueryInterface(this.entity, IID_Turretable);
+					let tur = 0;
+					if (cmpTurretable)
+					{
+						tur = cmpTurretable.HolderID();
+					}
+					let Tur = Engine.QueryInterface(tur, IID_UnitMotion);
+					if(tur && Tur)
+					{
+						let cmpTurAI = Engine.QueryInterface(tur, IID_UnitAI);
+						if(cmpTurAI)
+						{
+							let order = {
+							"target": this.order.data.target,
+							"force": true,
+							"entity": this.entity
+							};
+							cmpTurAI.AddOrder("WalkToTarget", { "target": this.order.data.target, "force": true }, true, false);
+							cmpTurAI.AddOrder("ReturnResource", order, true, false);
+						}
+						//this.FinishOrder();
+						return true;
+					}
 					if (!this.MoveTo(this.order.data, IID_ResourceGatherer))
 					{
 						this.FinishOrder();
@@ -4961,7 +5006,7 @@ UnitAI.prototype.CheckFormationTargetAttackRange = function(target)
  */
 UnitAI.prototype.CheckTargetVisible = function(target)
 {
-	if (this.isGarrisoned)
+	if (this.isGarrisoned && !this.IsTurret())
 		return false;
 
 	const cmpOwnership = Engine.QueryInterface(this.entity, IID_Ownership);
