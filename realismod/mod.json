@@ -1,0 +1,7 @@
+{
+    "name": "realismod",
+    "version": "0.8",
+    "label": "Realism Mod",
+    "description": "a mod that intends to be a backbone of realistic mods. it offer the required mechanisms, so that the non-programmer modders can take care of xml and art files only.",
+    "dependencies": ["0ad=0.0.27"]
+}
