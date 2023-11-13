@@ -404,10 +404,10 @@ UnitAI.prototype.UnitFsmSpec = {
 		return ACCEPT_ORDER;
 	},
 
-	"Order.Flee": function(msg) {
+	"Order.Flee": function(msg) {error(407)
 		if (!this.AbleToMove())
 			return this.FinishOrder();
-		this.SetNextState("INDIVIDUAL.FLEEING");
+		error("able to move");this.SetNextState("INDIVIDUAL.FLEEING");
 		return ACCEPT_ORDER;
 	},
 
@@ -2058,14 +2058,16 @@ UnitAI.prototype.UnitFsmSpec = {
 		},
 
 		"FLEEING": {
-			"enter": function() {
+			"enter": function() {error(2061)
 				// We use the distance between the entities to account for ranged attacks
-				this.order.data.distanceToFlee = PositionHelper.DistanceBetweenEntities(this.entity, this.order.data.target) + (+this.template.FleeDistance);
+				this.order.data.distanceToFlee = (PositionHelper.DistanceBetweenEntities(this.entity, this.order.data.target) + (+this.template.FleeDistance)) * 2;
 				let cmpUnitMotion = Engine.QueryInterface(this.entity, IID_UnitMotion);
 				// Use unit motion directly to ignore the visibility check. TODO: change this if we add LOS to fauna.
+				let cmpTargetPosition = Engine.QueryInterface(this.order.data.target, IID_Position);
+				let pos = cmpTargetPosition.GetPosition();
 				if (this.CheckTargetRangeExplicit(this.order.data.target, this.order.data.distanceToFlee, -1) ||
-				    !cmpUnitMotion || !cmpUnitMotion.MoveToTargetRange(this.order.data.target, this.order.data.distanceToFlee, -1))
-				{
+				    !cmpUnitMotion || !cmpUnitMotion.MoveToPointRange(pos.x, pos.z, this.order.data.distanceToFlee, -1))
+				{error(2068 + ": " + this.order.data.target + ", " + this.order.data.distanceToFlee + ". " + PositionHelper.DistanceBetweenEntities(this.entity, this.order.data.target))
 					this.FinishOrder();
 					return true;
 				}
@@ -2131,12 +2133,13 @@ UnitAI.prototype.UnitFsmSpec = {
 					if(this.IsRider())
 					{
 						let cmpTurAI = Engine.QueryInterface(this.IsRider(), IID_UnitAI);
-						if(cmpTurAI){
+						if(cmpTurAI)
+						{
 							let cmpTargetPosition = Engine.QueryInterface(this.order.data.target, IID_Position);
 							let pos = cmpTargetPosition.GetPosition();
-							cmpTurAI.MoveToPointRange(pos.x, pos.z, cmpAttack.GetRange(this.order.data.attackType).max -1, cmpAttack.GetRange(this.order.data.attackType).max);
+							cmpTurAI.MoveToPointRange(pos.x, pos.z, cmpAttack.GetRange(this.order.data.attackType).min, cmpAttack.GetRange(this.order.data.attackType).max);
 						}
-						this.FinishOrder();
+						this.StartTimer(1000, 1000);
 						return false;
 					}
 					if (!this.MoveToTargetAttackRange(this.order.data.target, this.order.data.attackType))
@@ -2152,14 +2155,14 @@ UnitAI.prototype.UnitFsmSpec = {
 					return false;
 				},
 
-				"leave": function() {
+				"leave": function() {error(2156)
 					this.StopMoving();
 					this.StopTimer();
 				},
 
 				"Timer": function(msg) {
 					if (this.ShouldAbandonChase(this.order.data.target, this.order.data.force, IID_Attack, this.order.data.attackType))
-					{
+					{error(2163)
 						this.FinishOrder();
 
 						if (this.GetStance().respondHoldGround)
@@ -2176,15 +2179,15 @@ UnitAI.prototype.UnitFsmSpec = {
 
 				"MovementUpdate": function(msg) {
 					if (msg.likelyFailure)
-					{
+					{error(2180)
 						// This also handles hunting.
 						if (this.orderQueue.length > 1)
-						{
+						{error(2183)
 							this.FinishOrder();
 							return;
 						}
 						else if (!this.order.data.force || !this.order.data.lastPos)
-						{
+						{error(2188)
 							this.SetNextState("COMBAT.FINDINGNEWTARGET");
 							return;
 						}
@@ -2213,7 +2216,7 @@ UnitAI.prototype.UnitFsmSpec = {
 						// Try moving again,
 						// attack range uses a height-related formula and our actual max range might have changed.
 						if (!this.MoveToTargetAttackRange(this.order.data.target, this.order.data.attackType))
-							this.FinishOrder();
+							{error(2217);this.FinishOrder();}
 				},
 			},
 
@@ -6560,6 +6563,9 @@ UnitAI.prototype.IsAttackingAsFormation = function()
 
 UnitAI.prototype.MoveRandomly = function(distance)
 {
+	//horses shouldn't move randomly when mounted.
+	if(this.IsRiden())
+		return;
 	// To minimize drift all across the map, describe circles
 	// approximated by polygons.
 	// And to avoid getting stuck in obstacles or narrow spaces, each side
