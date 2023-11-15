@@ -200,10 +200,12 @@ UnitAI.prototype.UnitFsmSpec = {
 		// (these can happen when stopping moving at the same time
 		// as switching states)
 		if(this.IsRiden())
-		{
+		{error(203 + ": " + this.entity + " -> " + this.IsRiden())
 			let RiderAI = Engine.QueryInterface(this.IsRiden(), IID_UnitAI);
 			RiderAI.UnitFsm.ProcessMessage(RiderAI, { "type": "MovementUpdate", "data": msg });
+			//return false;
 		}
+		error(207 + ": " + this.entity)
 	},
 
 	"ConstructionFinished": function(msg) {
@@ -1113,7 +1115,7 @@ UnitAI.prototype.UnitFsmSpec = {
 				this.StopMoving();
 			},
 
-			"MovementUpdate": function(msg) {
+			"MovementUpdate": function(msg) {error(1118 + ": " + this.entity)
 				if (msg.veryObstructed && !this.timer)
 				{
 					// It's possible that the controller (with large clearance)
@@ -1163,7 +1165,7 @@ UnitAI.prototype.UnitFsmSpec = {
 				Engine.ProfileStop();
 			},
 
-			"MovementUpdate": function(msg) {
+			"MovementUpdate": function(msg) {error(1168 + ": " + this.entity)
 				if (msg.likelyFailure || this.CheckRange(this.order.data))
 					this.FinishOrder();
 			},
@@ -1224,7 +1226,7 @@ UnitAI.prototype.UnitFsmSpec = {
 						this.SetNextState("MEMBER");
 				},
 
-				"MovementUpdate": function(msg) {
+				"MovementUpdate": function(msg) {error(1229 + ": " + this.entity)
 					if (!msg.likelyFailure && !msg.likelySuccess && !this.RelaxedMaxRangeCheck(this.order.data, this.DefaultRelaxedMaxRange))
 						return;
 
@@ -1295,7 +1297,7 @@ UnitAI.prototype.UnitFsmSpec = {
 					}
 				},
 
-				"MovementUpdate": function(msg) {
+				"MovementUpdate": function(msg) {error(1300 + ": " + this.entity)
 					if (msg.likelyFailure || msg.likelySuccess)
 						this.SetNextState("GARRISONING");
 				},
@@ -1330,7 +1332,7 @@ UnitAI.prototype.UnitFsmSpec = {
 				this.StopMoving();
 			},
 
-			"MovementUpdate": function(msg) {
+			"MovementUpdate": function(msg) {error(1335 + ": " + this.entity)
 				if (!msg.likelyFailure && !this.CheckRange(this.order.data))
 					return;
 
@@ -1357,7 +1359,7 @@ UnitAI.prototype.UnitFsmSpec = {
 					this.StopMoving();
 				},
 
-				"MovementUpdate": function(msg) {
+				"MovementUpdate": function(msg) {error(1362 + ": " + this.entity)
 					let target = this.order.data.target;
 					let cmpTargetUnitAI = Engine.QueryInterface(target, IID_UnitAI);
 					if (cmpTargetUnitAI && cmpTargetUnitAI.IsFormationMember())
@@ -1564,7 +1566,7 @@ UnitAI.prototype.UnitFsmSpec = {
 
 			// Occurs when the unit has reached its destination and the controller
 			// is done moving. The controller is notified.
-			"MovementUpdate": function(msg) {
+			"MovementUpdate": function(msg) {error(1569 + ": " + this.entity)
 				// When walking in formation, we'll only get notified in case of failure
 				// if the formation controller has stopped walking.
 				// Formations can start lagging a lot if many entities request short path
@@ -1590,7 +1592,7 @@ UnitAI.prototype.UnitFsmSpec = {
 				this.StopMoving();
 			},
 
-			"MovementUpdate": function() {
+			"MovementUpdate": function() {error(1595 + ": " + this.entity)
 				if (!this.CheckRange(this.order.data))
 					return;
 				this.FinishOrder();
@@ -1782,6 +1784,11 @@ UnitAI.prototype.UnitFsmSpec = {
 
 			"ROAMING": {
 				"enter": function() {
+					if(this.IsRiden())
+					{
+						this.SetNextState("IDLE");
+						return false;
+					}
 					this.SetFacePointAfterMove(false);
 					this.MoveRandomly(+this.template.RoamDistance);
 					this.StartTimer(randIntInclusive(+this.template.RoamTimeMin, +this.template.RoamTimeMax));
@@ -1795,10 +1802,20 @@ UnitAI.prototype.UnitFsmSpec = {
 				},
 
 				"Timer": function(msg) {
+					if(this.IsRiden())
+					{
+						this.SetNextState("IDLE");
+						return false;
+					}
 					this.SetNextState("LINGERING");
 				},
 
-				"MovementUpdate": function() {
+				"MovementUpdate": function() {error(1803 + ": " + this.entity)
+					if(this.IsRiden())
+					{
+						this.SetNextState("IDLE");
+						return false;
+					}
 					this.MoveRandomly(+this.template.RoamDistance);
 				},
 			},
@@ -1817,6 +1834,11 @@ UnitAI.prototype.UnitFsmSpec = {
 				},
 
 				"Timer": function(msg) {
+					if(this.IsRiden())
+					{
+						this.SetNextState("IDLE");
+						return false;
+					}
 					this.SetNextState("ROAMING");
 				},
 			},
@@ -1836,7 +1858,7 @@ UnitAI.prototype.UnitFsmSpec = {
 				this.StopMoving();
 			},
 
-			"MovementUpdate": function(msg) {
+			"MovementUpdate": function(msg) {error(1841 + ": " + this.entity)
 				// If it looks like the path is failing, and we are close enough stop anyways.
 				// This avoids pathing for an unreachable goal and reduces lag considerably.
 				if (msg.likelyFailure || msg.obstructed && this.RelaxedMaxRangeCheck(this.order.data, this.DefaultRelaxedMaxRange) ||
@@ -1869,7 +1891,7 @@ UnitAI.prototype.UnitFsmSpec = {
 				this.SetDefaultAnimationVariant();
 			},
 
-			"MovementUpdate": function(msg) {
+			"MovementUpdate": function(msg) {error(1874 + ": " + this.entity)
 				// If it looks like the path is failing, and we are close enough stop anyways.
 				// This avoids pathing for an unreachable goal and reduces lag considerably.
 				if (msg.likelyFailure || msg.obstructed && this.RelaxedMaxRangeCheck(this.order.data, this.DefaultRelaxedMaxRange) ||
@@ -1927,7 +1949,7 @@ UnitAI.prototype.UnitFsmSpec = {
 					this.FindWalkAndFightTargets();
 				},
 
-				"MovementUpdate": function(msg) {
+				"MovementUpdate": function(msg) {error(1932 + ": " + this.entity)
 					if (!msg.likelyFailure && !msg.likelySuccess && !this.RelaxedMaxRangeCheck(this.order.data, this.DefaultRelaxedMaxRange))
 						return;
 
@@ -2006,7 +2028,7 @@ UnitAI.prototype.UnitFsmSpec = {
 					this.SetDefaultAnimationVariant();
 				},
 
-				"MovementUpdate": function(msg) {
+				"MovementUpdate": function(msg) {error(2011 + ": " + this.entity)
 					if (msg.likelyFailure || this.CheckTargetRangeExplicit(this.isGuardOf, 0, this.guardRange))
 						this.SetNextState("GUARDING");
 				},
@@ -2059,14 +2081,13 @@ UnitAI.prototype.UnitFsmSpec = {
 
 		"FLEEING": {
 			"enter": function() {error(2061)
-				// We use the distance between the entities to account for ranged attacks
-				this.order.data.distanceToFlee = (PositionHelper.DistanceBetweenEntities(this.entity, this.order.data.target) + (+this.template.FleeDistance)) * 2;
+				error((+this.template.FleeDistance));// We use the distance between the entities to account for ranged attacks
+				this.order.data.distanceToFlee = PositionHelper.DistanceBetweenEntities(this.entity, this.order.data.target) + (+this.template.FleeDistance);
 				let cmpUnitMotion = Engine.QueryInterface(this.entity, IID_UnitMotion);
 				// Use unit motion directly to ignore the visibility check. TODO: change this if we add LOS to fauna.
 				let cmpTargetPosition = Engine.QueryInterface(this.order.data.target, IID_Position);
 				let pos = cmpTargetPosition.GetPosition();
-				if (this.CheckTargetRangeExplicit(this.order.data.target, this.order.data.distanceToFlee, -1) ||
-				    !cmpUnitMotion || !cmpUnitMotion.MoveToPointRange(pos.x, pos.z, this.order.data.distanceToFlee, -1))
+				if (!cmpUnitMotion || !cmpUnitMotion.MoveToPointRange(pos.x, pos.z, this.order.data.distanceToFlee, -1))
 				{error(2068 + ": " + this.order.data.target + ", " + this.order.data.distanceToFlee + ". " + PositionHelper.DistanceBetweenEntities(this.entity, this.order.data.target))
 					this.FinishOrder();
 					return true;
@@ -2103,7 +2124,7 @@ UnitAI.prototype.UnitFsmSpec = {
 				this.StopMoving();
 			},
 
-			"MovementUpdate": function(msg) {
+			"MovementUpdate": function(msg) {error(2107 + ": " + this.entity)
 				if (msg.likelyFailure || this.CheckTargetRangeExplicit(this.order.data.target, this.order.data.distanceToFlee, -1))
 					this.FinishOrder();
 			},
@@ -2137,7 +2158,7 @@ UnitAI.prototype.UnitFsmSpec = {
 						{
 							let cmpTargetPosition = Engine.QueryInterface(this.order.data.target, IID_Position);
 							let pos = cmpTargetPosition.GetPosition();
-							cmpTurAI.MoveToPointRange(pos.x, pos.z, cmpAttack.GetRange(this.order.data.attackType).min, cmpAttack.GetRange(this.order.data.attackType).max);
+							cmpTurAI.MoveToPointRange(pos.x, pos.z, cmpAttack.GetRange(this.order.data.attackType).min, cmpAttack.GetRange(this.order.data.attackType).max -1);
 						}
 						this.StartTimer(1000, 1000);
 						return false;
@@ -2177,7 +2198,7 @@ UnitAI.prototype.UnitFsmSpec = {
 					}
 				},
 
-				"MovementUpdate": function(msg) {
+				"MovementUpdate": function(msg) {error(2181 + ": " + this.entity)
 					if (msg.likelyFailure)
 					{error(2180)
 						// This also handles hunting.
@@ -2221,7 +2242,7 @@ UnitAI.prototype.UnitFsmSpec = {
 			},
 
 			"ATTACKING": {
-				"enter": function() {
+				"enter": function() {error(2224)
 					let target = this.order.data.target;
 					let cmpFormation = Engine.QueryInterface(target, IID_Formation);
 					if (cmpFormation)
@@ -2443,7 +2464,7 @@ UnitAI.prototype.UnitFsmSpec = {
 					}
 				},
 
-				"MovementUpdate": function(msg) {
+				"MovementUpdate": function(msg) {error(2447 + ": " + this.entity)
 					if (msg.likelyFailure)
 					{
 						// This also handles hunting.
@@ -2497,7 +2518,7 @@ UnitAI.prototype.UnitFsmSpec = {
 					"leave": function() {
 						this.StopMoving();
 					},
-					"MovementUpdate": function(msg) {
+					"MovementUpdate": function(msg) {error(2501 + ": " + this.entity)
 						// If it looks like the path is failing, and we are close enough from wanted range
 						// stop anyways. This avoids pathing for an unreachable goal and reduces lag considerably.
 						if (msg.likelyFailure ||
@@ -2568,7 +2589,7 @@ UnitAI.prototype.UnitFsmSpec = {
 					return false;
 				},
 
-				"MovementUpdate": function(msg) {
+				"MovementUpdate": function(msg) {error(2572 + ": " + this.entity)
 					// The GATHERING timer will handle finding a valid resource.
 					if (msg.likelyFailure)
 						this.SetNextState("FINDINGNEWTARGET");
@@ -2608,7 +2629,7 @@ UnitAI.prototype.UnitFsmSpec = {
 					this.SetDefaultAnimationVariant();
 				},
 
-				"MovementUpdate": function(msg) {
+				"MovementUpdate": function(msg) {error(2612 + ": " + this.entity)
 					if (msg.likelyFailure || msg.obstructed && this.RelaxedMaxRangeCheck(this.order.data, this.DefaultRelaxedMaxRange) ||
 						 this.CheckRange(this.order.data))
 						this.SetNextState("FINDINGNEWTARGET");
@@ -2847,7 +2868,7 @@ UnitAI.prototype.UnitFsmSpec = {
 						this.SetNextState("FINDINGNEWTARGET");
 				},
 
-				"MovementUpdate": function(msg) {
+				"MovementUpdate": function(msg) {error(2851 + ": " + this.entity)
 					if (msg.likelyFailure || this.CheckRange(this.order.data, IID_Heal))
 						this.SetNextState("HEALING");
 				},
@@ -2959,7 +2980,7 @@ UnitAI.prototype.UnitFsmSpec = {
 					this.StopMoving();
 				},
 
-				"MovementUpdate": function(msg) {
+				"MovementUpdate": function(msg) {error(2963 + ": " + this.entity)
 					if (msg.likelyFailure || this.CheckTargetRange(this.order.data.target, IID_ResourceGatherer))
 						this.SetNextState("DROPPINGRESOURCES");
 				},
@@ -3017,7 +3038,7 @@ UnitAI.prototype.UnitFsmSpec = {
 					this.StopMoving();
 				},
 
-				"MovementUpdate": function(msg) {
+				"MovementUpdate": function(msg) {error(3021 + ": " + this.entity)
 					if (this.CheckTargetRange(this.order.data.target, IID_TreasureCollector))
 						this.SetNextState("COLLECTING");
 					else if (msg.likelyFailure)
@@ -3083,7 +3104,7 @@ UnitAI.prototype.UnitFsmSpec = {
 					this.StopMoving();
 				},
 
-				"MovementUpdate": function(msg) {
+				"MovementUpdate": function(msg) {error(3087 + ": " + this.entity)
 					if (msg.likelyFailure || msg.obstructed && this.RelaxedMaxRangeCheck(this.order.data, this.DefaultRelaxedMaxRange) ||
 						 this.CheckRange(this.order.data))
 						this.SetNextState("FINDINGNEWTARGET");
@@ -3114,7 +3135,7 @@ UnitAI.prototype.UnitFsmSpec = {
 					this.StopMoving();
 				},
 
-				"MovementUpdate": function(msg) {
+				"MovementUpdate": function(msg) {error(3118 + ": " + this.entity)
 					if (!msg.likelyFailure && !this.CheckRange(this.order.data.nextTarget, IID_Trader))
 						return;
 					if (this.waypoints && this.waypoints.length)
@@ -3194,7 +3215,7 @@ UnitAI.prototype.UnitFsmSpec = {
 					this.StopMoving();
 				},
 
-				"MovementUpdate": function(msg) {
+				"MovementUpdate": function(msg) {error(3198 + ": " + this.entity)
 					if (msg.likelyFailure || msg.likelySuccess)
 						this.SetNextState("REPAIRING");
 				},
@@ -3379,7 +3400,7 @@ UnitAI.prototype.UnitFsmSpec = {
 					this.StopMoving();
 				},
 
-				"MovementUpdate": function(msg) {
+				"MovementUpdate": function(msg) {error(3383 + ": " + this.entity)
 					if (!msg.likelyFailure && !msg.likelySuccess)
 						return;
 
@@ -3555,7 +3576,7 @@ UnitAI.prototype.UnitFsmSpec = {
 					this.StopMoving();
 				},
 
-				"MovementUpdate": function(msg) {
+				"MovementUpdate": function(msg) {error(3559 + ": " + this.entity)
 					if (msg.likelyFailure || msg.likelySuccess)
 						this.SetNextState("LOADING");
 				},
