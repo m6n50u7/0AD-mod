@@ -2086,9 +2086,8 @@ UnitAI.prototype.UnitFsmSpec = {
 				this.order.data.distanceToFlee = cmpObstructionManager.DistanceToTarget(this.entity, this.order.data.target) + (+this.template.FleeDistance);
 				let cmpUnitMotion = Engine.QueryInterface(this.entity, IID_UnitMotion);
 				// Use unit motion directly to ignore the visibility check. TODO: change this if we add LOS to fauna.
-				let attackerAI = Engine.QueryInterface(this.order.data.target, IID_UnitAI);
 				
-				if (this.CheckTargetRangeExplicit(Target, this.order.data.distanceToFlee, -1) || !cmpUnitMotion || !cmpUnitMotion.MoveToTargetRange(Target, this.order.data.distanceToFlee, -1))
+				if (this.CheckTargetRangeExplicit(this.order.data.target, this.order.data.distanceToFlee, -1) || !cmpUnitMotion || !cmpUnitMotion.MoveToTargetRange(this.order.data.target, this.order.data.distanceToFlee, -1))
 				{
 					this.FinishOrder();
 					return true;
@@ -2102,11 +2101,6 @@ UnitAI.prototype.UnitFsmSpec = {
 
 			"OrderTargetRenamed": function(msg) {
 				// To avoid replaying the panic sound, handle this explicitly.
-				let Target;
-				if(attackerAI.IsRider())
-					Target = attackerAI.IsRider();
-				else
-					Target = this.order.data.target;
 				let cmpUnitMotion = Engine.QueryInterface(this.entity, IID_UnitMotion);
 				if (this.CheckTargetRangeExplicit(this.order.data.target, this.order.data.distanceToFlee, -1) ||
 				    !cmpUnitMotion || !cmpUnitMotion.MoveToTargetRange(this.order.data.target, this.order.data.distanceToFlee, -1))
