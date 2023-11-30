@@ -200,12 +200,11 @@ UnitAI.prototype.UnitFsmSpec = {
 		// (these can happen when stopping moving at the same time
 		// as switching states)
 		if(this.IsRiden())
-		{error(203 + ": " + this.entity + " -> " + this.IsRiden())
+		{
 			let RiderAI = Engine.QueryInterface(this.IsRiden(), IID_UnitAI);
 			RiderAI.UnitFsm.ProcessMessage(RiderAI, { "type": "MovementUpdate", "data": msg });
 			//return false;
 		}
-		error(207 + ": " + this.entity)
 	},
 
 	"ConstructionFinished": function(msg) {
@@ -406,10 +405,10 @@ UnitAI.prototype.UnitFsmSpec = {
 		return ACCEPT_ORDER;
 	},
 
-	"Order.Flee": function(msg) {error(407)
+	"Order.Flee": function(msg) {
 		if (!this.AbleToMove())
 			return this.FinishOrder();
-		error("able to move");this.SetNextState("INDIVIDUAL.FLEEING");
+		this.SetNextState("INDIVIDUAL.FLEEING");
 		return ACCEPT_ORDER;
 	},
 
@@ -1115,7 +1114,7 @@ UnitAI.prototype.UnitFsmSpec = {
 				this.StopMoving();
 			},
 
-			"MovementUpdate": function(msg) {error(1118 + ": " + this.entity)
+			"MovementUpdate": function(msg) {
 				if (msg.veryObstructed && !this.timer)
 				{
 					// It's possible that the controller (with large clearance)
@@ -1165,7 +1164,7 @@ UnitAI.prototype.UnitFsmSpec = {
 				Engine.ProfileStop();
 			},
 
-			"MovementUpdate": function(msg) {error(1168 + ": " + this.entity)
+			"MovementUpdate": function(msg) {
 				if (msg.likelyFailure || this.CheckRange(this.order.data))
 					this.FinishOrder();
 			},
@@ -1226,7 +1225,7 @@ UnitAI.prototype.UnitFsmSpec = {
 						this.SetNextState("MEMBER");
 				},
 
-				"MovementUpdate": function(msg) {error(1229 + ": " + this.entity)
+				"MovementUpdate": function(msg) {
 					if (!msg.likelyFailure && !msg.likelySuccess && !this.RelaxedMaxRangeCheck(this.order.data, this.DefaultRelaxedMaxRange))
 						return;
 
@@ -1297,7 +1296,7 @@ UnitAI.prototype.UnitFsmSpec = {
 					}
 				},
 
-				"MovementUpdate": function(msg) {error(1300 + ": " + this.entity)
+				"MovementUpdate": function(msg) {
 					if (msg.likelyFailure || msg.likelySuccess)
 						this.SetNextState("GARRISONING");
 				},
@@ -1332,7 +1331,7 @@ UnitAI.prototype.UnitFsmSpec = {
 				this.StopMoving();
 			},
 
-			"MovementUpdate": function(msg) {error(1335 + ": " + this.entity)
+			"MovementUpdate": function(msg) {
 				if (!msg.likelyFailure && !this.CheckRange(this.order.data))
 					return;
 
@@ -1359,7 +1358,7 @@ UnitAI.prototype.UnitFsmSpec = {
 					this.StopMoving();
 				},
 
-				"MovementUpdate": function(msg) {error(1362 + ": " + this.entity)
+				"MovementUpdate": function(msg) {
 					let target = this.order.data.target;
 					let cmpTargetUnitAI = Engine.QueryInterface(target, IID_UnitAI);
 					if (cmpTargetUnitAI && cmpTargetUnitAI.IsFormationMember())
@@ -1566,7 +1565,7 @@ UnitAI.prototype.UnitFsmSpec = {
 
 			// Occurs when the unit has reached its destination and the controller
 			// is done moving. The controller is notified.
-			"MovementUpdate": function(msg) {error(1569 + ": " + this.entity)
+			"MovementUpdate": function(msg) {
 				// When walking in formation, we'll only get notified in case of failure
 				// if the formation controller has stopped walking.
 				// Formations can start lagging a lot if many entities request short path
@@ -1592,7 +1591,7 @@ UnitAI.prototype.UnitFsmSpec = {
 				this.StopMoving();
 			},
 
-			"MovementUpdate": function() {error(1595 + ": " + this.entity)
+			"MovementUpdate": function() {
 				if (!this.CheckRange(this.order.data))
 					return;
 				this.FinishOrder();
@@ -1810,7 +1809,7 @@ UnitAI.prototype.UnitFsmSpec = {
 					this.SetNextState("LINGERING");
 				},
 
-				"MovementUpdate": function() {error(1803 + ": " + this.entity)
+				"MovementUpdate": function() {
 					if(this.IsRiden())
 					{
 						this.SetNextState("IDLE");
@@ -1858,7 +1857,7 @@ UnitAI.prototype.UnitFsmSpec = {
 				this.StopMoving();
 			},
 
-			"MovementUpdate": function(msg) {error(1841 + ": " + this.entity)
+			"MovementUpdate": function(msg) {
 				// If it looks like the path is failing, and we are close enough stop anyways.
 				// This avoids pathing for an unreachable goal and reduces lag considerably.
 				if (msg.likelyFailure || msg.obstructed && this.RelaxedMaxRangeCheck(this.order.data, this.DefaultRelaxedMaxRange) ||
@@ -1891,7 +1890,7 @@ UnitAI.prototype.UnitFsmSpec = {
 				this.SetDefaultAnimationVariant();
 			},
 
-			"MovementUpdate": function(msg) {error(1874 + ": " + this.entity)
+			"MovementUpdate": function(msg) {
 				// If it looks like the path is failing, and we are close enough stop anyways.
 				// This avoids pathing for an unreachable goal and reduces lag considerably.
 				if (msg.likelyFailure || msg.obstructed && this.RelaxedMaxRangeCheck(this.order.data, this.DefaultRelaxedMaxRange) ||
@@ -1949,7 +1948,7 @@ UnitAI.prototype.UnitFsmSpec = {
 					this.FindWalkAndFightTargets();
 				},
 
-				"MovementUpdate": function(msg) {error(1932 + ": " + this.entity)
+				"MovementUpdate": function(msg) {
 					if (!msg.likelyFailure && !msg.likelySuccess && !this.RelaxedMaxRangeCheck(this.order.data, this.DefaultRelaxedMaxRange))
 						return;
 
@@ -2028,7 +2027,7 @@ UnitAI.prototype.UnitFsmSpec = {
 					this.SetDefaultAnimationVariant();
 				},
 
-				"MovementUpdate": function(msg) {error(2011 + ": " + this.entity)
+				"MovementUpdate": function(msg) {
 					if (msg.likelyFailure || this.CheckTargetRangeExplicit(this.isGuardOf, 0, this.guardRange))
 						this.SetNextState("GUARDING");
 				},
