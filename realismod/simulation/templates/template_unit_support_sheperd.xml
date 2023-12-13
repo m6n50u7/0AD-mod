@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Entity parent="template_unit_support">
+  <Identity>
+    <GenericName>Sheperd</GenericName>
+  </Identity>
+  <AlertRaiser>
+    <List datatype="tokens">Sheep</List>
+    <RaiseAlertRange>50</RaiseAlertRange>
+    <EndOfAlertRange>100</EndOfAlertRange>
+    <SearchRange>100</SearchRange>
+    <Garrison>false</Garrison>
+  </AlertRaiser>
+  <VisualActor>
+    <Actor>units/muslims/sheperd.xml</Actor>
+  </VisualActor>
+  <UnitAI>
+    <CanPatrol>false</CanPatrol>
+    <Formations disable=""/>
+  </UnitAI>
+  <Vision>
+    <Range>32</Range>
+  </Vision>
+</Entity>

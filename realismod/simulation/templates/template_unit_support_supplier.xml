@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Entity parent="template_unit_support">
+  <Footprint replace="">
+    <Square width="3" depth="6"/>
+    <Height>4</Height>
+  </Footprint>
+  <Identity>
+    <Icon>units/kush_support_trader.png</Icon>
+  </Identity>
+  <AlertRaiser>
+    <List datatype="tokens">Camel Donkey</List>
+    <RaiseAlertRange>50</RaiseAlertRange>
+    <EndOfAlertRange>100</EndOfAlertRange>
+    <SearchRange>100</SearchRange>
+    <Garrison>false</Garrison>
+  </AlertRaiser>
+  <VisualActor>
+    <Actor>units/muslims/trader.xml</Actor>
+  </VisualActor>
+</Entity>
