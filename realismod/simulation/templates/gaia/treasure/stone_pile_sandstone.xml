@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Entity parent="template_gaia_treasure">
+  <Identity>
+    <SpecificName>Cut Sandstone</SpecificName>
+    <Icon>gaia/geology_stone_1.png</Icon>
+  </Identity>
+  <ResourceSupply>
+    <Type>stone.stocks</Type>
+    <Max>200</Max>
+  </ResourceSupply>
+  <VisualActor>
+    <Actor>props/special/eyecandy/stone_pile_sandstone.xml</Actor>
+  </VisualActor>
+</Entity>

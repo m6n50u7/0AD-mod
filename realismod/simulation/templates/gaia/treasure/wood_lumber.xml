@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Entity parent="template_gaia_treasure">
+  <Identity>
+    <SpecificName>Milled Lumber</SpecificName>
+  </Identity>
+  <ResourceSupply>
+    <Type>wood.stocks</Type>
+    <Max>200</Max>
+  </ResourceSupply>
+  <VisualActor>
+    <Actor>props/special/eyecandy/wood_pile.xml</Actor>
+  </VisualActor>
+</Entity>
