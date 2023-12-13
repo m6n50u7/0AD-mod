@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Entity parent="template_gaia_fruit">
+  <Footprint>
+    <Height>14</Height>
+    <Circle radius="13.0"/>
+  </Footprint>
+  <Identity>
+    <GenericName>Water</GenericName>
+    <Tooltip>drinkable water from river or lake.</Tooltip>
+  </Identity>
+  <Obstruction>
+    <Active>true</Active>
+    <BlockMovement>false</BlockMovement>
+    <BlockPathfinding>false</BlockPathfinding>
+    <DisableBlockMovement>false</DisableBlockMovement>
+    <DisableBlockPathfinding>false</DisableBlockPathfinding>
+    <Static width="37.0" depth="6.0"/>
+  </Obstruction>
+  <Ownership/>
+  <ResourceSupply>
+    <Type>water.well</Type>
+    <Max>Infinity</Max>
+    <MaxGatherers>14</MaxGatherers>
+  </ResourceSupply>
+  <VisualActor>
+    <Actor>temp/water_plane.xml</Actor>
+  </VisualActor>
+</Entity>

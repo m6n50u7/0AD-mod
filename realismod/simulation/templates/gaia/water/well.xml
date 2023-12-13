@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Entity parent="template_gaia_fruit">
+  <Footprint>
+    <Height>14</Height>
+  </Footprint>
+  <Identity>
+    <GenericName>Well</GenericName>
+    <Tooltip>Extract water from it.</Tooltip>
+  </Identity>
+  <ResourceSupply>
+    <Type>water.well</Type>
+    <Max>Infinity</Max>
+    <MaxGatherers>4</MaxGatherers>
+  </ResourceSupply>
+  <VisualActor>
+    <Actor>props/special/eyecandy/well_1_b.xml</Actor>
+  </VisualActor>
+</Entity>
