@@ -494,65 +494,9 @@ UnitAI.prototype.UnitFsmSpec = {
 
 	"Order.Gather": function(msg) {
 		let cmpResourceGatherer = Engine.QueryInterface(this.entity, IID_ResourceGatherer);
-		if (!cmpResourceGatherer && !msg.data.entity)
+		if (!cmpResourceGatherer)
 			return this.FinishOrder();
-		if (msg.data.entity)
-		{
-			let riderAI = Engine.QueryInterface(msg.data.entity, IID_UnitAI);
-			let cmpTurretable = Engine.QueryInterface(msg.data.entity, IID_Turretable);
-			cmpTurretable.LeaveTurret();
-			let order = {
-			"target": msg.data.target,
-			"type": msg.data.type,
-			"template": msg.data.template,
-			"force": msg.data.force,
-			"redrop": false,
-			"full": msg.data.full
-			};
-			riderAI.AddOrder("Gather", order, true, false);
-			riderAI.AddOrder("Garrison", { "target": this.entity, "force": true, "garrison": false }, true, false);
-			if(msg.data.redrop)
-			{
-				riderAI.AddOrder("DropAtNearestDropSite", { "force": true }, true, false);
-			}
-			return true;
-		}
 
-		if(this.IsRider())
-		{
-			let cmpTurAI = Engine.QueryInterface(this.IsRider(), IID_UnitAI);
-			if(cmpTurAI)
-			{
-				if(this.MustKillGatherTarget(msg.data.target))
-				{
-					//const bestAttack = Engine.QueryInterface(this.entity, IID_Attack)?.GetBestAttackAgainst(msg.data.target, false);
-					//if (!bestAttack)
-					//	return true;
-					this.PushOrderFront("Attack", { "target": msg.data.target, "force": !!msg.data.force, "hunting": true });
-					return ACCEPT_ORDER;
-				}
-				let order = {
-				"target": msg.data.target,
-				"type": msg.data.type,
-				"template": msg.data.template,
-				"force": msg.data.force,
-				"redrop": msg.data.redrop,
-				"full": msg.data.full,
-				"entity": this.entity
-				};
-				this.lastGathered = {
-				"target": msg.data.target,
-				"type": msg.data.type,
-				"template": msg.data.template,
-				"force": msg.data.force,
-				"redrop": msg.data.redrop,
-				"full": msg.data.full
-				};
-				cmpTurAI.AddOrder("WalkToTarget", { "target": msg.data.target, "force": true }, true, false);
-				cmpTurAI.AddOrder("Gather", order, true, false);
-			}
-			return true;
-		}
 		// We were given the order to gather while we were still gathering.
 		// This is needed because we don't re-enter the GATHER-state.
 		const taskedResourceType = cmpResourceGatherer.GetTaskedResourceType();
@@ -644,17 +588,6 @@ UnitAI.prototype.UnitFsmSpec = {
 	},
 
 	"Order.ReturnResource": function(msg) {
-		if (msg.data.entity)
-		{
-			let riderAI = Engine.QueryInterface(msg.data.entity, IID_UnitAI);
-			let order = {
-			"target": msg.data.target,
-			"force": true
-			};
-			riderAI.AddOrder("ReturnResource", order, true, true);
-			riderAI.AddOrder("Gather", riderAI.lastGathered, true, false);
-			return true;
-		}
 		if (this.CheckTargetRange(msg.data.target, IID_ResourceGatherer))
 			this.SetNextState("INDIVIDUAL.RETURNRESOURCE.DROPPINGRESOURCES");
 		else if (this.AbleToMove())
@@ -2155,7 +2088,6 @@ UnitAI.prototype.UnitFsmSpec = {
 						let cmpTurAI = Engine.QueryInterface(this.IsRider(), IID_UnitAI);
 						if(cmpTurAI)
 						{
-							let cmpTargetPosition = Engine.QueryInterface(this.order.data.target, IID_Position);
 							cmpTurAI.MoveToTargetRangeExplicit(this.order.data.target, cmpAttack.GetRange(this.order.data.attackType).min, cmpAttack.GetRange(this.order.data.attackType).max);
 						}
 						this.StartTimer(1000, 1000);
@@ -2409,13 +2341,9 @@ UnitAI.prototype.UnitFsmSpec = {
 					{
 						let cmpTurAI = Engine.QueryInterface(this.IsRider(), IID_UnitAI);
 						if(cmpTurAI){
-							//let cmpTargetPosition = Engine.QueryInterface(this.order.data.target, IID_Position);
-							//let pos = cmpTargetPosition.GetPosition();
 							let cmpAttack = Engine.QueryInterface(this.entity, IID_Attack);
 							cmpTurAI.MoveToTargetRangeExplicit(this.order.data.target, cmpAttack.GetRange(this.order.data.attackType).min, cmpAttack.GetRange(this.order.data.attackType).max / 2);
 						}
-						//this.FinishOrder();
-						//this.SetNextState("ATTACKING");
 						this.SetAnimationVariant("combat");
 						var cmpUnitAI = Engine.QueryInterface(this.order.data.target, IID_UnitAI);
 						if (cmpUnitAI && cmpUnitAI.IsFleeing())
@@ -2573,27 +2501,54 @@ UnitAI.prototype.UnitFsmSpec = {
 						this.FinishOrder();
 						return true;
 					}
-
-					let cmpSupply = Engine.QueryInterface(this.gatheringTarget, IID_ResourceSupply);
-					let cmpMirage = Engine.QueryInterface(this.gatheringTarget, IID_Mirage);
-					if ((!cmpMirage || !cmpMirage.Mirages(IID_ResourceSupply)) &&
-					    (!cmpSupply || !cmpSupply.AddGatherer(this.entity)) ||
-					    !this.MoveTo(this.order.data, IID_ResourceGatherer))
+					if(!this.IsRider())
 					{
-						// If the target's last known position is in FOW, try going there
-						// and hope that we might find it then.
-						let lastPos = this.order.data.lastPos;
-						if (this.gatheringTarget != INVALID_ENTITY &&
-						    lastPos && !this.CheckPositionVisible(lastPos.x, lastPos.z))
+						let cmpSupply = Engine.QueryInterface(this.gatheringTarget, IID_ResourceSupply);
+						let cmpMirage = Engine.QueryInterface(this.gatheringTarget, IID_Mirage);
+						if ((!cmpMirage || !cmpMirage.Mirages(IID_ResourceSupply)) &&
+						    (!cmpSupply || !cmpSupply.AddGatherer(this.entity)) ||
+						    !this.MoveTo(this.order.data, IID_ResourceGatherer))
 						{
-							this.PushOrderFront("Walk", {
-								"x": lastPos.x, "z": lastPos.z,
-								"force": this.order.data.force
-							});
+							// If the target's last known position is in FOW, try going there
+							// and hope that we might find it then.
+							let lastPos = this.order.data.lastPos;
+							if (this.gatheringTarget != INVALID_ENTITY &&
+							    lastPos && !this.CheckPositionVisible(lastPos.x, lastPos.z))
+							{
+								this.PushOrderFront("Walk", {
+									"x": lastPos.x, "z": lastPos.z,
+									"force": this.order.data.force
+								});
+								return true;
+							}
+							this.SetNextState("FINDINGNEWTARGET");
 							return true;
 						}
-						this.SetNextState("FINDINGNEWTARGET");
-						return true;
+					}
+					else
+					{
+						let that = Engine.QueryInterface(this.IsRider(), IID_UnitAI)
+						let cmpSupply = Engine.QueryInterface(this.gatheringTarget, IID_ResourceSupply);
+						let cmpMirage = Engine.QueryInterface(this.gatheringTarget, IID_Mirage);
+						if ((!cmpMirage || !cmpMirage.Mirages(IID_ResourceSupply)) &&
+						    (!cmpSupply || !cmpSupply.AddGatherer(this.entity)) ||
+						    !that.MoveToTarget(this.order.data.target))
+						{
+							// If the target's last known position is in FOW, try going there
+							// and hope that we might find it then.
+							let lastPos = this.order.data.lastPos;
+							if (this.gatheringTarget != INVALID_ENTITY &&
+							    lastPos && !this.CheckPositionVisible(lastPos.x, lastPos.z))
+							{
+								this.PushOrderFront("Walk", {
+									"x": lastPos.x, "z": lastPos.z,
+									"force": this.order.data.force
+								});
+								return true;
+							}
+							this.SetNextState("FINDINGNEWTARGET");
+							return true;
+						}
 					}
 					this.SetAnimationVariant("approach_" + this.order.data.type.specific);
 					return false;
@@ -2672,11 +2627,26 @@ UnitAI.prototype.UnitFsmSpec = {
 						this.ProcessMessage("TargetInvalidated");
 						return true;
 					}
+					if(this.IsRider())
+					{
+						this.Ride = this.IsRider();
+						let ride = Engine.QueryInterface(this.entity, IID_Turretable);
+						ride.LeaveTurret();
+						this.FaceTowardsTarget(this.order.data.target);
+					}
 
 					return false;
 				},
 
 				"leave": function() {
+					let rider = Engine.QueryInterface(this.entity, IID_Turretable);
+					let distance = PositionHelper.DistanceBetweenEntities(this.entity, this.Ride);
+					if(this.Ride != this.IsRider() && this.CanOccupyTurret(this.Ride) && (rider.GetRange(0, this.Ride).max > distance))
+					{
+						rider.OccupyTurret(this.Ride);
+					}
+					else
+						this.Ride = 0;
 					let cmpResourceGatherer = Engine.QueryInterface(this.entity, IID_ResourceGatherer);
 					if (cmpResourceGatherer)
 						cmpResourceGatherer.StopGathering();
@@ -2962,21 +2932,15 @@ UnitAI.prototype.UnitFsmSpec = {
 					
 					if(this.IsRider())
 					{
-						let cmpTurAI = Engine.QueryInterface(this.IsRider(), IID_UnitAI);
-						if(cmpTurAI)
+						let ride = Engine.QueryInterface(this.IsRider(), IID_UnitAI);
+						if(!ride.MoveToTarget(this.order.data.target))
 						{
-							let order = {
-							"target": this.order.data.target,
-							"force": true,
-							"entity": this.entity
-							};
-							cmpTurAI.AddOrder("WalkToTarget", { "target": this.order.data.target, "force": true }, true, false);
-							cmpTurAI.AddOrder("ReturnResource", order, true, false);
+							this.FinishOrder();
+							return true;
 						}
-						//this.FinishOrder();
-						return true;
+						ride.SetDefaultAnimationVariant();
 					}
-					if (!this.MoveTo(this.order.data, IID_ResourceGatherer))
+					else if (!this.MoveTo(this.order.data, IID_ResourceGatherer))
 					{
 						this.FinishOrder();
 						return true;
@@ -5821,9 +5785,9 @@ UnitAI.prototype.Gather = function(target, queued, pushFront)
 /**
  * Internal function to abstract the force parameter.
  */
-UnitAI.prototype.PerformGather = function(target, queued, force, pushFront = false, redrop = true, full = true, entity = 0)
+UnitAI.prototype.PerformGather = function(target, queued, force, pushFront = false, redrop = true, full = true)
 {
-	if (!this.CanGather(target) || entity)
+	if (!this.CanGather(target))
 	{
 		this.WalkToTarget(target, queued);
 		return;
@@ -5852,8 +5816,7 @@ UnitAI.prototype.PerformGather = function(target, queued, force, pushFront = fal
 		"template": template,
 		"force": force,
 		"redrop": redrop,
-		"full": full,
-		"entity": entity
+		"full": full
 	};
 	if(full)
 	{
@@ -5885,13 +5848,13 @@ UnitAI.prototype.PerformGather = function(target, queued, force, pushFront = fal
  * Adds gather-near-position order to the queue, not forced, so it can be
  * interrupted by attacks.
  */
-UnitAI.prototype.GatherNearPosition = function(x, z, type, template, queued, pushFront, redrop = true, full = true, entity = 0)
+UnitAI.prototype.GatherNearPosition = function(x, z, type, template, queued, pushFront, redrop = true, full = true, rider = 0)
 {
 	if (template.indexOf("resource|") != -1)
 		template = template.slice(9);
 
 	if (this.IsFormationController() || Engine.QueryInterface(this.entity, IID_ResourceGatherer))
-		this.AddOrder("GatherNearPosition", { "type": type, "template": template, "x": x, "z": z, "force": false, "redrop": redrop, "full": full, "entity": entity}, queued, pushFront);
+		this.AddOrder("GatherNearPosition", { "type": type, "template": template, "x": x, "z": z, "force": false, "redrop": redrop, "full": full, "rider": rider}, queued, pushFront);
 	else
 		this.AddOrder("Walk", { "x": x, "z": z, "force": false }, queued, pushFront);
 };
