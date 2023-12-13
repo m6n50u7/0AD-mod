@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Entity parent="template_gaia_herbs">
+<Entity parent="template_resource_grass_field">
   <Footprint>
     <Height>14</Height>
     <Circle radius="0.2"/>
