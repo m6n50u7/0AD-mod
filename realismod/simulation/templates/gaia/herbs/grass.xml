@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Entity parent="template_gaia_herbs">
+  <Footprint>
+    <Height>14</Height>
+    <Circle radius="0.2"/>
+  </Footprint>
+  <Obstruction>
+    <BlockMovement>false</BlockMovement>
+    <BlockPathfinding>false</BlockPathfinding>
+    <DisableBlockMovement>false</DisableBlockMovement>
+    <DisableBlockPathfinding>false</DisableBlockPathfinding>
+    <Static width="2.0" depth="2.0"/>
+  </Obstruction>
+  <Identity>
+    <SpecificName>Grass</SpecificName>
+  </Identity>
+  <ResourceSupply>
+    <Type>vegan.herbs</Type>
+    <Max>10</Max>
+  </ResourceSupply>
+  <VisualActor>
+    <Actor>flora/trees/grass_1.xml</Actor>
+  </VisualActor>
+</Entity>
