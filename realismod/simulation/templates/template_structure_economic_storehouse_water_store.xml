@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Entity parent="template_structure_economic_storehouse">
+  <Identity>
+    <GenericName>Reservoir</GenericName>
+  </Identity>
+  <BuildRestrictions>
+    <Territory>own ally neutral enemy</Territory>
+  </BuildRestrictions>
+  <Footprint>
+    <Square width="3.0" depth="3.0"/>
+    <Height>8.0</Height>
+  </Footprint>
+  <Obstruction>
+    <Static width="5.0" depth="5.0"/>
+  </Obstruction>
+  <Health>
+    <Max>100</Max>
+    <SpawnEntityOnDeath>decay</SpawnEntityOnDeath>
+  </Health>
+  <ResourceSupply>
+    <KillBeforeGather>false</KillBeforeGather>
+    <Max>500</Max>
+    <Initial>0</Initial>
+    <RemoveOnExhaust>false</RemoveOnExhaust>
+    <Type>water.well</Type>
+    <MaxGatherers>15</MaxGatherers>
+  </ResourceSupply>
+  <ResourceDropsite>
+    <Types>water</Types>
+    <Sharable>true</Sharable>
+  </ResourceDropsite>
+  <Cost>
+    <BuildTime>10</BuildTime>
+    <Resources>
+      <wood>20</wood>
+    </Resources>
+  </Cost>
+  <Capturable>
+    <RegenRate>5.0</RegenRate>
+  </Capturable>
+  <TerritoryDecay>
+    <DecayRate>1</DecayRate>
+  </TerritoryDecay>
+  <VisualActor>
+    <Actor>temp/reservoir.xml</Actor>
+    <SilhouetteDisplay>true</SilhouetteDisplay>
+    <SilhouetteOccluder>false</SilhouetteOccluder>
+    <VisibleInAtlasOnly>false</VisibleInAtlasOnly>
+  </VisualActor>
+</Entity>

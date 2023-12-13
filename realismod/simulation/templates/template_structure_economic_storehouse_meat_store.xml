@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Entity parent="template_structure_economic_storehouse">
+  <Identity>
+    <Civ>gaia</Civ>
+    <GenericName>Meat Store</GenericName>
+  </Identity>
+  <BuildRestrictions>
+    <Territory>own ally neutral enemy</Territory>
+  </BuildRestrictions>
+  <ResourceSupply>
+    <KillBeforeGather>false</KillBeforeGather>
+    <Max>5000</Max>
+    <Initial>0</Initial>
+    <RemoveOnExhaust>false</RemoveOnExhaust>
+    <Type>meat.suplm</Type>
+    <MaxGatherers>15</MaxGatherers>
+  </ResourceSupply>
+  <ResourceDropsite>
+    <Types>meat</Types>
+    <Sharable>true</Sharable>
+  </ResourceDropsite>
+  <Capturable>
+    <RegenRate>5.0</RegenRate>
+  </Capturable>
+  <TerritoryDecay>
+    <DecayRate>1</DecayRate>
+  </TerritoryDecay>
+</Entity>
