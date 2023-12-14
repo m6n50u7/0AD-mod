@@ -1,0 +1,12 @@
+{
+	"type": "garrison",
+	"affects": ["Ram"],
+	"modifications": [
+		{ "value": "Attack/Melee/PrepareTime", "mul": 0.75 },
+		{ "value": "Attack/Melee/RepeatTime", "mul": 0.75 },
+		{ "value": "Attack/Melee/Damage/crush", "mul": 1.33 }
+	],
+	"auraName": "Manning Rams",
+	"auraDescription": "the more ram is manned the faster and stronger are the hits.",
+	"stackable": true
+}

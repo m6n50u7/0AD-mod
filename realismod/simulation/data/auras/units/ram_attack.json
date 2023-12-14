@@ -1,0 +1,10 @@
+{
+	"type": "garrison",
+	"affects": ["Ram"],
+	"modifications": [
+		{ "value": "Attack/Melee/MaxRange", "add": 6.5 }
+	],
+	"auraName": "Manning Rams",
+	"auraDescription": "Rams needs to be manned to attack.",
+	"stackable": false
+}

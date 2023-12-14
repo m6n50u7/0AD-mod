@@ -1,0 +1,10 @@
+{
+	"type": "garrison",
+	"affects": ["Ship"],
+	"modifications": [
+		{ "value": "UnitMotion/WalkSpeed", "add": 5 }
+	],
+	"auraName": "Sailing",
+	"auraDescription": "Ships need sailors to move.",
+	"stackable": true
+}
