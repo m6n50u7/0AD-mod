@@ -15,9 +15,10 @@
     <Floating>false</Floating>
     <FloatDepth>0.0</FloatDepth>
   </Position>
-    <ResourceSupply>
+  <ResourceSupply>
     <Type>meat.suplm</Type>
     <Max>100</Max>
+  </ResourceSupply>
   <VisualActor>
     <Actor>props/special/eyecandy/barrels_buried.xml</Actor>
   </VisualActor>

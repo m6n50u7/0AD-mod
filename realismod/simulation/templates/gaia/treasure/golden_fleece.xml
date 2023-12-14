@@ -10,6 +10,7 @@
   <ResourceSupply>
     <Type>gold.jewels</Type>
     <Max>100</Max>
+  </ResourceSupply>
   <VisualActor>
     <Actor>special/golden_fleece.xml</Actor>
   </VisualActor>

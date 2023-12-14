@@ -15,6 +15,7 @@
   <ResourceSupply>
     <Type>metal.stocks</Type>
     <Max>300</Max>
+  </ResourceSupply>
   <VisualActor>
     <Actor>props/special/eyecandy/barrel_a.xml</Actor>
   </VisualActor>
