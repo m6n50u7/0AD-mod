@@ -31,7 +31,10 @@
   <StatusBars>
     <HeightOffset>3.75</HeightOffset>
   </StatusBars>
-  <Treasure>
-    <CollectTime>1000</CollectTime>
-  </Treasure>
+  <ResourceSupply>
+    <KillBeforeGather>false</KillBeforeGather>
+    <Max>1</Max>
+    <Type>wood.stocks</Type>
+    <MaxGatherers>2</MaxGatherers>
+  </ResourceSupply>
 </Entity>
