@@ -90,7 +90,7 @@ Turretable.prototype.OccupyTurret = function(target, turretPointName = "", eject
 	this.ejectable = ejectable;
 
 	let cmpUnitAI = Engine.QueryInterface(this.entity, IID_UnitAI);
-	if (cmpUnitAI)
+	if (cmpUnitAI && !this.Is_rider())
 	{
 		cmpUnitAI.SetGarrisoned();
 		let cmpTurMotion = Engine.QueryInterface(target, IID_UnitMotion);
@@ -130,6 +130,7 @@ Turretable.prototype.HorseMovement = function()
  */
 Turretable.prototype.LeaveTurret = function(forced = false)
 {
+	let horse = this.Is_rider();
 	if (!this.holder)
 		return true;
 
@@ -161,7 +162,7 @@ Turretable.prototype.LeaveTurret = function(forced = false)
 	}
 
 	let cmpUnitAI = Engine.QueryInterface(this.entity, IID_UnitAI);
-	if (cmpUnitAI)
+	if (cmpUnitAI && !horse)
 	{
 		cmpUnitAI.Ungarrison();
 		cmpUnitAI.ResetTurretStance();
