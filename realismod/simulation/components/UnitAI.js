@@ -2640,8 +2640,10 @@ UnitAI.prototype.UnitFsmSpec = {
 
 				"leave": function() {
 					let rider = Engine.QueryInterface(this.entity, IID_Turretable);
-					let distance = PositionHelper.DistanceBetweenEntities(this.entity, this.Ride);
-					if(this.Ride != this.IsRider() && this.CanOccupyTurret(this.Ride) && (rider.GetRange(0, this.Ride).max > distance))
+					let distance;
+					if(this.Ride)
+						distance = PositionHelper.DistanceBetweenEntities(this.entity, this.Ride);
+					if(this.Ride && !this.IsRider() && this.CanOccupyTurret(this.Ride) && (rider.GetRange(0, this.Ride).max > distance))
 					{
 						rider.OccupyTurret(this.Ride);
 					}
