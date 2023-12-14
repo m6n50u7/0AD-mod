@@ -183,20 +183,19 @@ Builder.prototype.PerformBuilding = function(data, lateness)
 		}
 	}
 	let maxwork = Math.min(this.GetRate(), (Math.min(carry, cmpFoundation.GetNeededResourceCount(type)) / cmpFoundation.GetResRate()) * this.GetRate());
-error("maxwork = " + maxwork)
+
 	if (maxwork)
-	{error("1:")
+	{
 		let res = [];
 		let elm = {};
 		elm.type = type;
-		elm.amount = carry - Math.ceil(maxwork * cmpFoundation.GetResRate() * cmpFoundation.buildMultiplier);error(Math.floor(maxwork * cmpFoundation.GetResRate() * cmpFoundation.buildMultiplier))
-error(Math.floor(maxwork * cmpFoundation.GetResRate()))
+		elm.amount = carry - Math.ceil(maxwork * cmpFoundation.GetResRate() * cmpFoundation.buildMultiplier);
 		res.push(elm);
 		cmpResourceGatherer.GiveResources(res);
 		cmpFoundation.ReduceNeededResourceCount(type, Math.floor(maxwork * cmpFoundation.GetResRate() * cmpFoundation.buildMultiplier));
 	}
 	else
-	{error("2:")
+	{
 		this.StopRepairing();
 		let tries = 0;
 		for(let reso in cost)
