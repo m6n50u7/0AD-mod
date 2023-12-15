@@ -1469,31 +1469,63 @@ UnitAI.prototype.UnitFsmSpec = {
 
 		"WALKING": {
 			"enter": function() {
-				let cmpUnitMotion = Engine.QueryInterface(this.entity, IID_UnitMotion);
-				cmpUnitMotion.MoveToFormationOffset(this.order.data.target, this.order.data.x, this.order.data.z);
-				if (this.order.data.offsetsChanged)
+				if(!this.IsRider())
 				{
-					let cmpFormation = Engine.QueryInterface(this.formationController, IID_Formation);
-					if (cmpFormation)
-						this.formationAnimationVariant = cmpFormation.GetFormationAnimationVariant(this.entity);
+					let cmpUnitMotion = Engine.QueryInterface(this.entity, IID_UnitMotion);
+					cmpUnitMotion.MoveToFormationOffset(this.order.data.target, this.order.data.x, this.order.data.z);
+					if (this.order.data.offsetsChanged)
+					{
+						let cmpFormation = Engine.QueryInterface(this.formationController, IID_Formation);
+						if (cmpFormation)
+							this.formationAnimationVariant = cmpFormation.GetFormationAnimationVariant(this.entity);
+					}
+					if (this.formationAnimationVariant)
+						this.SetAnimationVariant(this.formationAnimationVariant);
+					else if (this.order.data.variant)
+						this.SetAnimationVariant(this.order.data.variant);
+					else
+						this.SetDefaultAnimationVariant();
+					return false;
 				}
-				if (this.formationAnimationVariant)
-					this.SetAnimationVariant(this.formationAnimationVariant);
-				else if (this.order.data.variant)
-					this.SetAnimationVariant(this.order.data.variant);
 				else
-					this.SetDefaultAnimationVariant();
-				return false;
+				{
+					let cmpUnitMotion = Engine.QueryInterface(this.IsRider(), IID_UnitMotion);
+					cmpUnitMotion.MoveToFormationOffset(this.order.data.target, this.order.data.x, this.order.data.z);
+					if (this.order.data.offsetsChanged)
+					{
+						let cmpFormation = Engine.QueryInterface(this.formationController, IID_Formation);
+						if (cmpFormation)
+							this.formationAnimationVariant = cmpFormation.GetFormationAnimationVariant(this.entity);
+					}
+					if (this.formationAnimationVariant)
+						this.SetAnimationVariant(this.formationAnimationVariant);
+					else if (this.order.data.variant)
+						this.SetAnimationVariant(this.order.data.variant);
+					else
+						this.SetDefaultAnimationVariant();
+					return false;
+				}
 			},
 
 			"leave": function() {
 				// Don't use the logic from unitMotion, as SetInPosition
 				// has already given us a custom rotation
 				// (or we failed to move and thus don't care.)
-				let facePointAfterMove = this.GetFacePointAfterMove();
-				this.SetFacePointAfterMove(false);
-				this.StopMoving();
-				this.SetFacePointAfterMove(facePointAfterMove);
+				if(!this.IsRider())
+				{
+					let facePointAfterMove = this.GetFacePointAfterMove();
+					this.SetFacePointAfterMove(false);
+					this.StopMoving();
+					this.SetFacePointAfterMove(facePointAfterMove);
+				}
+				else
+				{
+					let ride = Engine.QueryInterface(this.IsRider(), IID_UnitAI);
+					let facePointAfterMove = this.GetFacePointAfterMove();
+					ride.SetFacePointAfterMove(false);
+					ride.StopMoving();
+					ride.SetFacePointAfterMove(facePointAfterMove);
+				}
 			},
 
 			// Occurs when the unit has reached its destination and the controller
@@ -1736,6 +1768,13 @@ UnitAI.prototype.UnitFsmSpec = {
 				"Timer": function(msg) {
 					if(this.IsRiden())
 					{
+						this.Rid = true;
+						this.SetNextState("IDLE");
+						return false;
+					}
+					if(this.Rid)
+					{
+						this.Rid = false;
 						this.SetNextState("IDLE");
 						return false;
 					}
@@ -1745,6 +1784,13 @@ UnitAI.prototype.UnitFsmSpec = {
 				"MovementUpdate": function() {
 					if(this.IsRiden())
 					{
+						this.Rid = true;
+						this.SetNextState("IDLE");
+						return false;
+					}
+					if(this.Rid)
+					{
+						this.Rid = false;
 						this.SetNextState("IDLE");
 						return false;
 					}
@@ -1768,6 +1814,13 @@ UnitAI.prototype.UnitFsmSpec = {
 				"Timer": function(msg) {
 					if(this.IsRiden())
 					{
+						this.Rid = true;
+						this.SetNextState("IDLE");
+						return false;
+					}
+					if(this.Rid)
+					{
+						this.Rid = false;
 						this.SetNextState("IDLE");
 						return false;
 					}
@@ -2642,8 +2695,11 @@ UnitAI.prototype.UnitFsmSpec = {
 					let rider = Engine.QueryInterface(this.entity, IID_Turretable);
 					let distance;
 					if(this.Ride)
-						distance = PositionHelper.DistanceBetweenEntities(this.entity, this.Ride);
-					if(this.Ride && !this.IsRider() && this.CanOccupyTurret(this.Ride) && (rider.GetRange(0, this.Ride).max > distance))
+					{
+						let cmpObstructionManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_ObstructionManager);
+						distance = cmpObstructionManager.DistanceToTarget(this.entity, this.Ride);
+					}
+					if(this.Ride && !this.IsRider() && this.CanOccupyTurret(this.Ride) && ((rider.GetRange(0, this.Ride).max * 2) > distance))
 					{
 						rider.OccupyTurret(this.Ride);
 					}
@@ -2655,8 +2711,8 @@ UnitAI.prototype.UnitFsmSpec = {
 				},
 
 				"InventoryFilled": function(msg) {
-					if(this.order.data.redrop){
-						this.SetNextState("RETURNINGRESOURCE");}
+					if(this.order.data.redrop)
+						this.SetNextState("RETURNINGRESOURCE");
 					else {
 						this.FinishOrder();
 						return true;
@@ -5850,13 +5906,13 @@ UnitAI.prototype.PerformGather = function(target, queued, force, pushFront = fal
  * Adds gather-near-position order to the queue, not forced, so it can be
  * interrupted by attacks.
  */
-UnitAI.prototype.GatherNearPosition = function(x, z, type, template, queued, pushFront, redrop = true, full = true, rider = 0)
+UnitAI.prototype.GatherNearPosition = function(x, z, type, template, queued, pushFront, redrop = true, full = true)
 {
 	if (template.indexOf("resource|") != -1)
 		template = template.slice(9);
 
 	if (this.IsFormationController() || Engine.QueryInterface(this.entity, IID_ResourceGatherer))
-		this.AddOrder("GatherNearPosition", { "type": type, "template": template, "x": x, "z": z, "force": false, "redrop": redrop, "full": full, "rider": rider}, queued, pushFront);
+		this.AddOrder("GatherNearPosition", { "type": type, "template": template, "x": x, "z": z, "force": false, "redrop": redrop, "full": full}, queued, pushFront);
 	else
 		this.AddOrder("Walk", { "x": x, "z": z, "force": false }, queued, pushFront);
 };
@@ -6327,7 +6383,7 @@ UnitAI.prototype.GetStance = function()
 
 UnitAI.prototype.GetSelectableStances = function()
 {
-	if (this.IsTurret())
+	if (this.IsTurret() && !this.IsRider())
 		return [];
 	return Object.keys(g_Stances).filter(key => g_Stances[key].selectable);
 };

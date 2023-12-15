@@ -902,7 +902,9 @@ Formation.prototype.ComputeMotionParameters = function()
 	const cmpPathfinder = Engine.QueryInterface(SYSTEM_ENTITY, IID_Pathfinder);
 	for (let ent of this.members)
 	{
-		const cmpUnitMotion = Engine.QueryInterface(ent, IID_UnitMotion);
+		let tur = Engine.QueryInterface(ent, IID_Turretable);
+		let move = tur.Is_rider() || ent;
+		const cmpUnitMotion = Engine.QueryInterface(move, IID_UnitMotion);
 		if (!cmpUnitMotion)
 			continue;
 		minSpeed = Math.min(minSpeed, cmpUnitMotion.GetWalkSpeed());

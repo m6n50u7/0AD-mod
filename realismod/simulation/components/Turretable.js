@@ -106,6 +106,9 @@ Turretable.prototype.OccupyTurret = function(target, turretPointName = "", eject
 	let cmpObstruction = Engine.QueryInterface(this.entity, IID_Obstruction);
 	if (cmpObstruction)
 		cmpObstruction.SetActive(false);
+	//make the horse know he have a rider so that he don't roam while his owner is gathering
+	let horse = Engine.QueryInterface(target, IID_UnitAI);
+	horse.Rid = true;
 
 	Engine.PostMessage(this.entity, MT_TurretedStateChanged, {
 		"oldHolder": INVALID_ENTITY,
