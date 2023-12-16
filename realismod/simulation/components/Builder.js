@@ -170,7 +170,19 @@ Builder.prototype.PerformBuilding = function(data, lateness)
 	let carry = 0;
 	let cmpResourceGatherer = Engine.QueryInterface(this.entity, IID_ResourceGatherer);
 	let car = cmpResourceGatherer.GetCarryingStatus();
-	let cost = cmpFoundation.GetResourceCosts();
+	let cost = {};
+	let c = Engine.QueryInterface(this.target, IID_Cost).GetResourceCosts();
+	let res = 0;
+	let main;
+	for(let i in c)
+	{
+		if(c[i] > res)
+		{
+			res = c[i];
+			main = i;
+		}
+	}
+	cost[main] = 1;
 	if (car)
 	{
 		for(let carried of car)
@@ -182,17 +194,30 @@ Builder.prototype.PerformBuilding = function(data, lateness)
 			}
 		}
 	}
-	let maxwork = Math.min(this.GetRate(), (Math.min(carry, cmpFoundation.GetNeededResourceCount(type)) / cmpFoundation.GetResRate()) * this.GetRate());
-
+	let maxwork;
+	if(cmpFoundation)
+	{
+		cost = cmpFoundation.GetResourceCosts();
+		maxwork = Math.min(this.GetRate(), (Math.min(carry, cmpFoundation.GetNeededResourceCount(type)) / cmpFoundation.GetResRate()) * this.GetRate());
+	}
+	else if(type == main)
+	{
+		maxwork = this.GetRate();
+	}
 	if (maxwork)
 	{
 		let res = [];
 		let elm = {};
 		elm.type = type;
-		elm.amount = carry - Math.ceil(maxwork * cmpFoundation.GetResRate() * cmpFoundation.buildMultiplier);
+		if(cmpFoundation)
+			elm.amount = carry - Math.ceil(maxwork * cmpFoundation.GetResRate() * cmpFoundation.buildMultiplier);
+		else
+			elm.amount = carry - 1;
+
 		res.push(elm);
 		cmpResourceGatherer.GiveResources(res);
-		cmpFoundation.ReduceNeededResourceCount(type, Math.floor(maxwork * cmpFoundation.GetResRate() * cmpFoundation.buildMultiplier));
+		if(cmpFoundation)
+			cmpFoundation.ReduceNeededResourceCount(type, Math.floor(maxwork * cmpFoundation.GetResRate() * cmpFoundation.buildMultiplier));
 	}
 	else
 	{
@@ -200,7 +225,7 @@ Builder.prototype.PerformBuilding = function(data, lateness)
 		let tries = 0;
 		for(let reso in cost)
 		{
-			if(cmpFoundation.GetNeededResourceCount(reso))
+			if(cmpFoundation && cmpFoundation.GetNeededResourceCount(reso))
 			{
 				let filter = (ent, type, template) => {
 				let cmpRes = Engine.QueryInterface(ent, IID_ResourceSupply);
@@ -216,8 +241,27 @@ Builder.prototype.PerformBuilding = function(data, lateness)
 				if (res && !tries)
 				{
 					tries = 1;
-					cmpUnitAI.PerformGather(res, false, false, true, false);//(target, queued, force, pushFront = false, redrop = true)
-					cmpUnitAI.Repair(this.targeted, true, true, false);
+					cmpUnitAI.PerformGather(res, true, false, true, false);
+				}
+				break;
+			}
+			else if(!cmpFoundation)
+			{
+				let filter = (ent, type, template) => {
+				let cmpRes = Engine.QueryInterface(ent, IID_ResourceSupply);
+				if (type.generic == reso && cmpRes.GetCurrentAmount())
+					return true;};
+				let cmpUnitAI = Engine.QueryInterface(this.entity, IID_UnitAI);
+				let cmpPosition = Engine.QueryInterface(this.entity, IID_Position);
+				let pos = cmpPosition.GetPosition();
+				let cmpVision = Engine.QueryInterface(this.entity, IID_Vision);
+				let posi = Vector2D.from3D(pos);
+				let rang = cmpVision.GetRange();
+				let res = cmpUnitAI.FindNearbyResource(posi, filter, rang);
+				if (res && !tries)
+				{
+					tries = 1;
+					cmpUnitAI.PerformGather(res, true, false, true, false);
 				}
 				break;
 			}
